@@ -1,0 +1,19 @@
+{
+  "includes": [
+    "src/**/*.ts"
+  ],
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "target": "es6",
+    "strictNullChecks": true,
+    "allowJs": false,
+    "noImplicitThis": true,
+    "watch": false
+  },
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts",
+    "gulpfile.js"
+  ]
+}
