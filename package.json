@@ -5,7 +5,8 @@
   "main": "main.js",
   "scripts": {
     "build": "gulp",
-    "start": "rm -rf build && gulp && node build/main.js",
+    "start": "rm -rf build && gulp && node build/src/main.js",
+    "idea": "rm -rf build && gulp && node build/idea/main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "janbean",

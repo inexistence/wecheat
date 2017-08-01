@@ -1,6 +1,7 @@
 {
   "includes": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "idea/**/*.ts"
   ],
   "compilerOptions": {
     "module": "commonjs",

@@ -1,51 +1,66 @@
-export class Looper {
-  private interval?: NodeJS.Timer
-  handlers: Handler[] = []
-  intervalTime: number = 1000
-  id: string
-  name: string
-
-  constructor (name?:string, intervalTime?: number) {
-    if (intervalTime) this.intervalTime = intervalTime
-    this.id = Math.random().toString().substring(2,17)
-    this.name = name || this.id
-  }
-
-  addHandler (handler: Handler) {
-    this.handlers.push(handler)
-  }
-
-  removeHandler (handler: Handler) {
-    const handlerIndex = this.handlers.findIndex(h => h === handler)
-    if (handlerIndex >= 0) {
-      this.handlers.splice(handlerIndex, 1)
-    }
-  }
-
-  loop (this: Looper) {
-    if (this.interval) {
-      console.warn(`looper (id: ${this.id}; name: ${this.name}) is already running.`)
-      return
-    }
-    this.interval = setInterval(() => {
-      for (const handler of this.handlers) {
-        handler.handle(this)
-      }
-    }, this.intervalTime)
-  }
-
-  stop (this: Looper) {
-    if (this.interval)
-      clearInterval(this.interval!)
-    this.interval = undefined
-  }
-
-  destroy (this: Looper) {
-    this.stop()
-    this.handlers = []
-  }
+export interface Looper {
+  execute (handler: Handler, msg: Message): void
 }
 
-export interface Handler {
-  handle (looper: Looper, ...args: any[]): any
+export abstract class Handler {
+
+  constructor (private looper?: Looper) {
+  }
+
+  getLooper (): Looper {
+    return this.looper || QueueLooper.get()
+  }
+
+  sendMessage (this: Handler, msg: Message): void {
+    const looper = this.getLooper()
+    looper.execute(this, msg)
+  }
+
+  post (cb: () => void, millions: number = 0) {
+    setTimeout(() => {
+      cb()
+    }, millions)
+  }
+
+  postMessage (this: Handler, msg: Message) {
+    setTimeout(() => {
+      const looper = this.getLooper()
+      looper.execute(this, msg)
+    }, 0)
+  }
+
+  abstract handleMessage (msg: Message): any
+}
+
+export class Message {
+  [key: string]: any
+}
+
+export class QueueLooper {
+  private static mainLooper?: QueueLooper
+
+  static get (): QueueLooper {
+    if (!QueueLooper.mainLooper) {
+      QueueLooper.mainLooper = new QueueLooper()
+    }
+    return QueueLooper.mainLooper
+  }
+
+  constructor (public options: any = {}) {
+  }
+
+  assertMaximumStack (): never {
+    throw Error('Call #postMessage but not #sendMessage in #handleMessage. Or Error "Maximum call stack size exceeded" would happend')
+  }
+
+  execute (handler: Handler, msg: Message) {
+    try {
+      const sendMessage = handler.sendMessage
+      handler.sendMessage = this.assertMaximumStack
+      handler.handleMessage({...msg})
+      handler.sendMessage = sendMessage
+    } catch (e) {
+      console.error(e)
+    }
+  }
 }
