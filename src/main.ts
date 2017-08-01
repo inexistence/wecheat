@@ -9,6 +9,7 @@ import WeCheat from './WeCheat'
   if (loginInfo) {
     console.log('login success', loginInfo)
   }
+  const web = await wecheat.webInit()
+  console.log('web init', web)
 
-  
 })().catch(e => console.error(e))

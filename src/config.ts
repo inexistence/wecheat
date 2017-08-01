@@ -13,12 +13,12 @@ export type LOGIN_QUERY = {
 }
 export class URLConfig {
   static APP_ID: string = 'wx782c26e4c19acffb'
-  static BASE_URL: string = 'https://login.weixin.qq.com'
-  static GET_QRCODE_UUID: string = `${URLConfig.BASE_URL}/jslogin`
-  static LOGIN: string = `${URLConfig.BASE_URL}/cgi-bin/mmwebwx-bin/login`
+  static LOGIN_BASE_URL: string = 'https://login.weixin.qq.com'
+  static GET_QRCODE_UUID: string = `${URLConfig.LOGIN_BASE_URL}/jslogin`
+  static LOGIN: string = `${URLConfig.LOGIN_BASE_URL}/cgi-bin/mmwebwx-bin/login`
 
   static QRCODE_IMAGE: (uuid: string) => string = function (uuid: string): string {
-    return `${URLConfig.BASE_URL}/qrcode/${uuid}`
+    return `${URLConfig.LOGIN_BASE_URL}/qrcode/${uuid}`
   }
   static USER_AGENT: string = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36'
 }

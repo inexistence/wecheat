@@ -1,17 +1,22 @@
-import request = require('request-promise')
+import request = require('request')
+import rp = require('request-promise')
 import { EventEmitter } from 'events'
 import * as utils from './utils'
 import libxmljs = require('libxmljs')
+import tough = require('tough-cookie')
 
 import { URLConfig, GET_QRCODE_UUID_QUERY, LOGIN_QUERY } from './config'
 
-request.defaults({jar: true})
+const jar = rp.jar()
+rp.defaults({jar})
 
 export default class WeCheat {
   alive: boolean = false
   isLogging: boolean = false
   emitter: EventEmitter = new EventEmitter()
   loginInfo?: LoginInfo
+  constructor () {
+  }
 
   /**
    * 开始登录流程
@@ -54,6 +59,28 @@ export default class WeCheat {
     }
   }
 
+  async webInit (): Promise<any> {
+    if (!this.loginInfo) {
+      throw new Error('have not login!')
+    }
+    const uri = `${this.loginInfo.url}/webwxinit?r=${Math.floor((new Date().getTime())/1000)}`
+    const bodyData = {
+      'BaseRequest': this.loginInfo.BaseRequest
+    }
+    const headers = {
+      'User-Agent' : URLConfig.USER_AGENT
+    }
+    const result = await rp({
+      method: 'POST',
+      uri,
+      headers,
+      body: bodyData,
+      json: true,
+      jar
+    })
+    return result
+  }
+
   /**
    * 监控用户是否扫描二维码
    * @param uuid qrcode uuid
@@ -67,7 +94,7 @@ export default class WeCheat {
       uuid
     }
     const loginCheckUrl: string = URLConfig.LOGIN
-    const body: string = await request({
+    const body: string = await rp({
       uri: loginCheckUrl,
       qs: query
     })
@@ -96,7 +123,7 @@ export default class WeCheat {
     return new Promise<LoginInfo>((resolve, reject) => {
       const redirectMatch = body.match(/window.redirect_uri="(\S+)";/)
       const redirect = redirectMatch[1]
-      console.log('url', redirect)
+      const url = (redirect.match(/(https{0,1}:\/\/\S+)\//))[1]
       const domainMatch = redirect.match(/https{0,1}:\/\/([\w|\.]+)/)
       const domain = domainMatch && domainMatch[1]
       let fileUrl = redirect, syncUrl = redirect
@@ -104,15 +131,21 @@ export default class WeCheat {
         fileUrl = `https://file.${domain}/cgi-bin/mmwebwx-bin`
         syncUrl = `https://webpush.${domain}/cgi-bin/mmwebwx-bin`
       }
-      request({
+      rp({
         uri: redirect,
         headers: { 'User-Agent' : URLConfig.USER_AGENT },
-        followRedirect: false
-      }).then((res) => {
+        followRedirect: false,
+        jar
+      }).then((res: any) => {
         reject(new Error(`301 statusCode wanted. but got ${res}`))
-      }).catch((error) => {
-        if(error.statusCode === 301) {
+      }).catch((error: any) => {
+        if (error.statusCode === 301) {
           const loginInfoXML = error.response.body
+          const cookies = error.response.headers['set-cookie']
+          for (const cookie of cookies) {
+            const c = (<request.Cookie> this.createCookie(cookie))
+            jar.setCookie(c, `https://${domain}`)
+          }
           let skey, wxsid, wxuin, pass_ticket
           try {
             const xmlDoc: libxmljs.XMLDocument = libxmljs.parseXml(loginInfoXML)
@@ -125,25 +158,44 @@ export default class WeCheat {
           }
           const deviceid = 'e' + Math.random().toString().substring(2,17)
           resolve({
-            url: redirect,
+            domain,
+            url,
             fileUrl,
             syncUrl,
             deviceid,
             skey,
             wxsid,
-            wxuin,
+            wxuin: wxuin,
             pass_ticket,
             BaseRequest: {
               Skey: skey,
               Sid: wxsid,
               Uin: wxuin,
-              DeviceID: pass_ticket
+              DeviceID: deviceid
             }
           })
         } else {
           reject(error)
         }
       })
+    })
+  }
+
+  private createCookie (str: string): any {
+    // TODO 优化
+    const data = str.split(';')
+    const valueStrs = data[0].split('=')
+    const key = valueStrs[0]
+    const value = valueStrs[1]
+
+    const domain = data[1].split('=')[1]
+
+    const path = data[2].split('=')[1]
+    const expires = data[3].split('=')[1]
+    return new tough.Cookie({
+      key,
+      value,
+      domain
     })
   }
 
@@ -174,7 +226,7 @@ export default class WeCheat {
       lang: 'en_US',
       _: (new Date()).getTime().toString()
     }
-    const body: string = await request({
+    const body: string = await rp({
       uri: URLConfig.GET_QRCODE_UUID,
       headers: { 'User-Agent' : URLConfig.USER_AGENT },
       qs: query
