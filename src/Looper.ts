@@ -16,17 +16,17 @@ export abstract class Handler {
     looper.execute(this, msg)
   }
 
-  post (cb: () => void, millions: number = 0) {
+  post (cb: () => void, delay: number = 0) {
     setTimeout(() => {
       cb()
-    }, millions)
+    }, delay)
   }
 
-  postMessage (this: Handler, msg: Message) {
+  postMessage (this: Handler, msg: Message, delay: number = 0) {
     setTimeout(() => {
       const looper = this.getLooper()
       looper.execute(this, msg)
-    }, 0)
+    }, delay)
   }
 
   abstract handleMessage (msg: Message): any
@@ -55,9 +55,11 @@ export class QueueLooper {
 
   execute (handler: Handler, msg: Message) {
     try {
+      // If use #sendMessage in #handleMessage,
+      // Error "Maximum call stack size exceeded" would happend.
       const sendMessage = handler.sendMessage
       handler.sendMessage = this.assertMaximumStack
-      handler.handleMessage({...msg})
+      handler.handleMessage(msg)
       handler.sendMessage = sendMessage
     } catch (e) {
       console.error(e)
