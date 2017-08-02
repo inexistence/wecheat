@@ -1,20 +1,16 @@
-import request = require('request')
 import rp = require('request-promise')
 import { EventEmitter } from 'events'
 import * as utils from './utils'
 import libxmljs = require('libxmljs')
-import tough = require('tough-cookie')
 
 import { URLConfig, GET_QRCODE_UUID_QUERY, LOGIN_QUERY } from './config'
-
-const jar = rp.jar()
-rp.defaults({jar})
 
 export default class WeCheat {
   alive: boolean = false
   isLogging: boolean = false
   emitter: EventEmitter = new EventEmitter()
   loginInfo?: LoginInfo
+
   constructor () {
   }
 
@@ -76,7 +72,7 @@ export default class WeCheat {
       headers,
       body: bodyData,
       json: true,
-      jar
+      jar: true
     })
     return result
   }
@@ -135,17 +131,12 @@ export default class WeCheat {
         uri: redirect,
         headers: { 'User-Agent' : URLConfig.USER_AGENT },
         followRedirect: false,
-        jar
+        jar: true
       }).then((res: any) => {
         reject(new Error(`301 statusCode wanted. but got ${res}`))
       }).catch((error: any) => {
         if (error.statusCode === 301) {
           const loginInfoXML = error.response.body
-          const cookies = error.response.headers['set-cookie']
-          for (const cookie of cookies) {
-            const c = (<request.Cookie> this.createCookie(cookie))
-            jar.setCookie(c, `https://${domain}`)
-          }
           let skey, wxsid, wxuin, pass_ticket
           try {
             const xmlDoc: libxmljs.XMLDocument = libxmljs.parseXml(loginInfoXML)
@@ -178,24 +169,6 @@ export default class WeCheat {
           reject(error)
         }
       })
-    })
-  }
-
-  private createCookie (str: string): any {
-    // TODO 优化
-    const data = str.split(';')
-    const valueStrs = data[0].split('=')
-    const key = valueStrs[0]
-    const value = valueStrs[1]
-
-    const domain = data[1].split('=')[1]
-
-    const path = data[2].split('=')[1]
-    const expires = data[3].split('=')[1]
-    return new tough.Cookie({
-      key,
-      value,
-      domain
     })
   }
 
