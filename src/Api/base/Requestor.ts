@@ -6,9 +6,9 @@ export default class Requestor {
   userInfo?: UserInfo
 
   rp (options: any): request.RequestPromise {
-    return request(Object.assign(options, {
+    return request(Object.assign({
       headers: { 'User-Agent' : URLConfig.USER_AGENT },
       jar: true
-    }))
+    }, options))
   }
 }

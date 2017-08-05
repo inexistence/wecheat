@@ -30,7 +30,7 @@ export default class extends Handler {
 
   async handleMessage(msg: Message) {
     if (!this.isRunning) return
-    console.log('handleMessage', msg)
+    console.log('sync checking...')
     try {
       const selector = await this.api.sync.syncCheck(msg.syncKey)
       if (selector !== 0) {
@@ -51,10 +51,17 @@ export default class extends Handler {
           this.onModContactList(modContactList)
         }
       }
-      this.postMessage(msg, 1000)
-    } catch (e) {
-      this.handleError(e)
-      this.isRunning = false
+      this.postMessage(msg)
+    } catch (e) { 
+      if (e.message.includes('TIMEDOUT') ||
+        e.message == 'Error: socket hang up') {
+        // try again if timeout
+        console.warn(e.message, 'when sync. Try check again.')
+        this.postMessage(msg, 1000)
+      } else {
+        this.handleError(e)
+        this.isRunning = false
+      }
     }
   }
 

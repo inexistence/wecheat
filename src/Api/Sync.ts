@@ -25,7 +25,8 @@ export default class Sync extends BaseApi {
     }
     const syncResult = await this.rp({
       uri,
-      qs: params
+      qs: params,
+      timeout: 1 * 60 * 1000
     })
     const match = syncResult.match(/window.synccheck={retcode:"(\d+)",selector:"(\d+)"}/)
     if (match[1] == 1101) {
