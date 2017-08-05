@@ -79,7 +79,7 @@ export default class WeCheat {
   }
 
   emit (this: WeCheat, event: string|symbol, ...args: any[]) {
-    this.emitter.emit(event, args)
+    this.emitter.emit(event, ...args)
   }
 
   onAddMsgList (this: WeCheat, addMsgList: any[]) {
