@@ -11,7 +11,7 @@ export const pgv_y = function (d?: string): string {
 }
 
 export const pgv_d = function (): number {
-  return (Math.round(Math.random() * 2147483647) * (new Date().getUTCMilliseconds())) % 10000000000;
+  return (Math.round(Math.random() * 2147483647) * (new Date().getUTCMilliseconds())) % 10000000000
 }
 
 export const pgv_pvi = function (): string {
@@ -33,10 +33,8 @@ export const pgv = function (): PGV {
   }
 }
 
-export const json2Cookie = function (json: any): string[] {
-  let cookies = []
-  for (const key in json) {
-    cookies.push(`${key}=${json[key]}; `)
-  }
-  return cookies
+export const synckey2Str =  function (syncKey: SyncKey) {
+  return syncKey.List.reduce((last: string, item: {Key: number, Val: number}): string => {
+    return `${last}${last ? '|': ''}${item.Key}_${item.Val}`
+  }, '')
 }
