@@ -1,4 +1,4 @@
-import {Handler, QueueLooper, Message} from '../src/Looper'
+import {Handler, QueueLooper, Message} from '../src/Looper/Looper'
 import * as utils from '../src/utils'
 
 class HeartbeatHandler extends Handler {
