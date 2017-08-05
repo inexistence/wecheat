@@ -64,13 +64,13 @@ export default class WeCheat {
 
       this.syncHandler.start(initInfo.SyncKey)
 
+      console.timeEnd('login')
       this.emitter.emit('login', userInfo)
       return userInfo
     } catch (e) {
       console.error(e)
     } finally {
       this.isLogging = false
-      console.timeEnd('login')
     }
   }
 
