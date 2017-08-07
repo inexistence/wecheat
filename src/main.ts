@@ -4,9 +4,9 @@ const qrcodeTerminal = require('qrcode-terminal')
 ;(async () => {
   const wecheat: WeCheat = new WeCheat()
 
-  wecheat.on('scan', (qrcode, uuid) => {
+  wecheat.on('qrcode', (qrcode, uuid) => {
     const loginUrl = qrcode.replace(/\/qrcode\//, '/l/')
-    console.log('scan', qrcode, loginUrl)
+    console.log('qrcode', qrcode)
     qrcodeTerminal.generate(loginUrl)
   })
 

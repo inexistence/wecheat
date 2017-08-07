@@ -33,7 +33,7 @@ export default class WeCheat {
     try { 
       const {uuid, qrcodeUrl} = (await this.api.login.getQRCode())
 
-      this.emit('scan', qrcodeUrl, uuid)
+      this.emit('qrcode', qrcodeUrl, uuid)
 
       let loginSuccess: boolean = false
       while(!loginSuccess) {
