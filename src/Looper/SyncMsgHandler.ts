@@ -8,6 +8,9 @@ export default class extends Handler {
   onAddMsgListListener?: (addMsgList: any[]) => void
   onModContactListListener?: (modContactList: any[]) => void
   onErrorListener?: (error: Error) => void
+  onDisconnectListener?: (reason: string, retry: boolean) => void
+  onReconnectListener?: () => void
+  disconnect?: boolean = false
 
   constructor (protected api: ApiFactory) {
     super()
@@ -51,30 +54,30 @@ export default class extends Handler {
           this.onModContactList(modContactList)
         }
       }
+      if (this.disconnect) {
+        this.onReconnect()
+        this.disconnect = false
+      }
       this.postMessage(msg)
-    } catch (e) { 
+    } catch (e) {
       if (e.message.includes('TIMEDOUT') ||
         e.message == 'Error: socket hang up') {
+        if (!this.disconnect) {
+          this.onDisconnect(e.message, true)
+          this.disconnect = true
+        }
         // try again if timeout
         console.warn(e.message, 'when sync. Try check again.')
         this.postMessage(msg, 1000)
       } else {
+        if (!this.disconnect) {
+          this.onDisconnect(e.message, false)
+          this.disconnect = true
+        }
         this.handleError(e)
         this.isRunning = false
       }
     }
-  }
-
-  setOnAddMsgListListener (listener: (addMsgList: any[]) => void) {
-    this.onAddMsgListListener = listener
-  }
-  
-  setOnModContactListListener (listener: (modContactList: any[]) => void) {
-    this.onModContactListListener = listener
-  }
-
-  setOnErrorListener (listener: (error: Error) => void) {
-    this.onErrorListener = listener
   }
 
   onAddMsgList (addMsgList: any[]) {
@@ -83,6 +86,14 @@ export default class extends Handler {
 
   onModContactList (modContactList: any[]) {
     if (this.onModContactListListener) this.onModContactListListener(modContactList)
+  }
+
+  onDisconnect (reason: string, retry: boolean) {
+    if (this.onDisconnectListener) this.onDisconnectListener(reason, retry)
+  }
+
+  onReconnect () {
+    if (this.onReconnectListener) this.onReconnectListener()
   }
 
   handleError (e: Error) {

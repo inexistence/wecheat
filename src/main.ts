@@ -21,6 +21,14 @@ const qrcodeTerminal = require('qrcode-terminal')
   wecheat.on('onModContactList', (modContactList) => {
     console.log('modContactList', modContactList)
   })
+
+  wecheat.on('disconnect', (reason, retry) => {
+    console.log('disconnect by', reason, `Retry: ${retry}`)
+  })
+
+  wecheat.on('reconnect', () => {
+    console.log('reconnect')
+  })
   await wecheat.login()
 
 })().catch(e => console.error(e))

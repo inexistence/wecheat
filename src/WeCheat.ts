@@ -17,9 +17,17 @@ export default class WeCheat {
   constructor () {
     this.api = new ApiFactory()
     this.syncHandler = new SyncMsgHandler(this.api)
-    this.syncHandler.setOnAddMsgListListener(this.onAddMsgList.bind(this))
-    this.syncHandler.setOnModContactListListener(this.onModContactList.bind(this))
-    this.syncHandler.setOnErrorListener(this.handleError.bind(this))
+
+    this.syncHandler.onAddMsgListListener = this.onAddMsgList.bind(this)
+    this.syncHandler.onModContactListListener = this.onModContactList.bind(this)
+    this.syncHandler.onErrorListener = this.handleError.bind(this)
+
+    this.syncHandler.onDisconnectListener = ((reason: string, retry: boolean) => {
+      this.emit('disconnect', reason, retry)
+    }).bind(this)
+    this.syncHandler.onReconnectListener = (() => {
+      this.emit('reconnect')
+    }).bind(this)
   }
 
   /**
