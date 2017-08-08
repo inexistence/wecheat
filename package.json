@@ -4,8 +4,8 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "build": "gulp",
-    "start": "rm -rf build && gulp && node build/src/main.js",
+    "build": "rm -rf build && gulp",
+    "start": "rm -rf build && gulp && node build/sample/main.js",
     "idea": "rm -rf build && gulp && node build/idea/main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -14,14 +14,14 @@
   "devDependencies": {
     "gulp": "^3.9.1",
     "gulp-typescript": "^3.2.1",
-    "typescript": "^2.4.2"
+    "typescript": "^2.4.2",
+    "qrcode-terminal": "^0.11.0"
   },
   "dependencies": {
     "@types/libxmljs": "^0.14.30",
     "@types/node": "^8.0.17",
     "@types/request-promise": "^4.1.36",
     "libxmljs": "^0.18.7",
-    "qrcode-terminal": "^0.11.0",
     "request": "^2.81.0",
     "request-promise": "^4.2.1"
   }

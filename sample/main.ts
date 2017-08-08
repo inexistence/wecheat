@@ -1,4 +1,4 @@
-import WeCheat from './WeCheat'
+import WeCheat from '../src/WeCheat'
 const qrcodeTerminal = require('qrcode-terminal')
 
 ;(async () => {
