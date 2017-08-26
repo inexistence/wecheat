@@ -12,7 +12,15 @@ export default class BaseApi {
     return this.requestor.loginInfo;
   }
 
+  set loginInfo(logininfo: LoginInfo | undefined) {
+    this.requestor.loginInfo = logininfo;
+  }
+
   get userInfo(): UserInfo | undefined {
     return this.requestor.userInfo;
+  }
+
+  set userInfo(userinfo: UserInfo | undefined) {
+    this.requestor.userInfo = userinfo;
   }
 }

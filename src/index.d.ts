@@ -11,7 +11,7 @@ declare type LoginInfo = {
   BaseRequest: {
     Skey: string;
     Sid: string;
-    Uin: string;
+    Uin: number;
     DeviceID: string;
   };
 };
@@ -36,7 +36,7 @@ declare type SyncKey = {
 };
 
 // just mark
-type WXMessage = {
+type _WXMessage = {
   [key: string]: any;
   BaseResponse: {Ret: number, ErrMsg: string};
   AddMsgList: {

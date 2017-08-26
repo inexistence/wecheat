@@ -38,8 +38,8 @@ export default class extends Handler {
       const selector = await this.api.sync.syncCheck(msg.syncKey);
       if (selector !== 0) {
         const getMsgResult = await this.api.sync.getMsg(msg.syncKey);
-        if (getMsgResult.SyncCheckKey) {
-          msg.syncKey = getMsgResult.SyncCheckKey;
+        if (getMsgResult.SyncKey) {
+          msg.syncKey = getMsgResult.SyncKey;
         }
         const addMsgList = getMsgResult.AddMsgList;
         const modContactList = getMsgResult.ModContactList;
@@ -58,7 +58,7 @@ export default class extends Handler {
         this.onReconnect();
         this.disconnect = false;
       }
-      this.postMessage(msg);
+      this.postMessage(msg, 1000);
     } catch (e) {
       if (e.message.includes('TIMEDOUT') ||
         e.message == 'Error: socket hang up') {

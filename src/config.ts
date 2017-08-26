@@ -2,7 +2,7 @@ export type GET_QRCODE_UUID_QUERY = {
   appid: string;
   fun: string;
   lang: string;
-  _: string;
+  _: number;
 }
 
 export type LOGIN_QUERY = {
@@ -10,7 +10,7 @@ export type LOGIN_QUERY = {
   uuid: string;
   tip: number;
   r?: string;
-  _: string;
+  _: number;
 }
 export class URLConfig {
   static APP_ID: string = 'wx782c26e4c19acffb';

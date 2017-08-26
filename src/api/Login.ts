@@ -4,13 +4,21 @@ import { URLConfig, GET_QRCODE_UUID_QUERY, LOGIN_QUERY } from '../config';
 import libxmljs = require('libxmljs');
 
 export default class Login extends BaseApi {
+  static readonly DOMAIN_MAP: any = {
+    'wx2.qq.com': ['file.wx2.qq.com', 'webpush.wx2.qq.com'],
+    'wx8.qq.com': ['file.wx8.qq.com', 'webpush.wx8.qq.com'],
+    'qq.com': ['file.wx.qq.com', 'webpush.wx.qq.com'],
+    'web2.wechat.com': ['file.web2.wechat.com', 'webpush.web2.wechat.com'],
+    'wechat.com': ['file.web.wechat.com', 'webpush.web.wechat.com']
+  };
+
   async webInit(): Promise<any> {
     if (!this.loginInfo) {
       throw new Error('have not login!');
     }
-    const uri = `${this.loginInfo.url}/webwxinit?r=${Math.floor((new Date().getTime())/1000)}`;
+    const uri = `${this.loginInfo.url}/webwxinit?pass_ticket=${this.loginInfo.pass_ticket}&skey=${this.loginInfo.skey}&r=${utils.second()}`;
     const bodyData = {
-      'BaseRequest': this.loginInfo.BaseRequest
+      BaseRequest: this.loginInfo.BaseRequest
     };
     const result = await this.rp({
       method: 'POST',
@@ -44,7 +52,7 @@ export default class Login extends BaseApi {
       appid: URLConfig.APP_ID,
       fun: 'new',
       lang: 'en_US',
-      _: (new Date()).getTime().toString()
+      _: utils.second()
     };
     const body: string = await this.rp({
       uri: URLConfig.GET_QRCODE_UUID,
@@ -70,7 +78,7 @@ export default class Login extends BaseApi {
     const query: LOGIN_QUERY = {
       loginicon: true,
       tip: 1,
-      _: (new Date()).getTime().toString(),
+      _: utils.second(),
       uuid
     };
     const loginCheckUrl: string = URLConfig.LOGIN;
@@ -109,8 +117,14 @@ export default class Login extends BaseApi {
       const domain = domainMatch && domainMatch[1];
       let fileUrl = redirect, syncUrl = redirect;
       if (domain) {
-        fileUrl = `https://file.${domain}/cgi-bin/mmwebwx-bin`;
-        syncUrl = `https://webpush.${domain}/cgi-bin/mmwebwx-bin`;
+        const domainUrls = Login.DOMAIN_MAP[domain];
+        if (domainUrls) {
+          fileUrl = `https://${domainUrls[0]}/cgi-bin/mmwebwx-bin`;
+          syncUrl = `https://${domainUrls[1]}/cgi-bin/mmwebwx-bin`;
+        } else {
+          fileUrl = `https://file.${domain}/cgi-bin/mmwebwx-bin`;
+          syncUrl = `https://webpush.${domain}/cgi-bin/mmwebwx-bin`;
+        }
       }
       this.rp({
         uri: redirect,
@@ -144,7 +158,7 @@ export default class Login extends BaseApi {
             BaseRequest: {
               Skey: skey,
               Sid: wxsid,
-              Uin: wxuin,
+              Uin: Number(wxuin),
               DeviceID: deviceid
             }
           });
@@ -168,9 +182,9 @@ export default class Login extends BaseApi {
       'Code': 3,
       'FromUserName': this.userInfo.UserName,
       'ToUserName': this.userInfo.UserName,
-      'ClientMsgId': Math.floor((new Date().getTime())/1000)
+      'ClientMsgId': utils.second()
     };
-    const result = await this.rp({
+    await this.rp({
       method: 'POST',
       uri,
       body: data,

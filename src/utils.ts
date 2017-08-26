@@ -36,3 +36,11 @@ export function synckey2Str(syncKey: SyncKey) {
     return `${last}${last ? '|': ''}${item.Key}_${item.Val}`;
   }, '');
 }
+
+export function second() {
+  return Math.floor((new Date().getTime()) / 1000)
+}
+
+export function millionSecond() {
+  return new Date().getTime()
+}
