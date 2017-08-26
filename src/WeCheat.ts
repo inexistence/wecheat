@@ -68,7 +68,7 @@ export default class WeCheat {
       const initInfo = await this.api.login.webInit();
       const userInfo = initInfo.User as UserInfo;
       this.api.userInfo = userInfo;
-      this.api.login.showMobileState();
+      await this.api.login.showMobileState();
 
       this.syncHandler.start(initInfo.SyncKey);
 
