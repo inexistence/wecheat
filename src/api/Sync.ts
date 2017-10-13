@@ -1,3 +1,6 @@
+/**
+ * 同步相关 API
+ */
 import BaseApi from './base/BaseApi';
 import * as utils from '../utils';
 import { URLConfig } from '../config';

@@ -14,8 +14,8 @@ const qrcodeTerminal = require('qrcode-terminal');
     console.log('login success', userInfo);
   });
 
-  wecheat.on('onAddMsgList', (addMsgList) => {
-    console.log('addMsgList', addMsgList);
+  wecheat.on('onReceiveMsg', (type, msg) => {
+    console.log('onReceiveMsg', type, msg);
   });
 
   wecheat.on('onModContactList', (modContactList) => {

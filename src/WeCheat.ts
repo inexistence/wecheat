@@ -1,8 +1,8 @@
 import rp = require('request-promise');
 import { EventEmitter } from 'events';
 import * as utils from './utils';
-import libxmljs = require('libxmljs');
 import {Handler, Message} from './looper/Looper';
+import WXMessage from './wxmessage/WXMessage'
 import SyncMsgHandler from './looper/SyncMsgHandler';
 import ApiFactory from './api';
 
@@ -21,6 +21,7 @@ export default class WeCheat {
     this.syncHandler.onAddMsgListListener = this.onAddMsgList.bind(this);
     this.syncHandler.onModContactListListener = this.onModContactList.bind(this);
     this.syncHandler.onErrorListener = this.handleError.bind(this);
+    this.syncHandler.onReceiveMsgListener = this.onReceiveMsgListener.bind(this);
 
     this.syncHandler.onDisconnectListener = ((reason: string, retry: boolean) => {
       this.emit('disconnect', reason, retry);
@@ -96,6 +97,10 @@ export default class WeCheat {
 
   onModContactList(this: WeCheat, modContactList: any[]) {
     this.emit('onModContactList', modContactList);
+  }
+
+  onReceiveMsgListener(this: WeCheat, type: number, msg: WXMessage): void {
+    this.emit('onReceiveMsg', type, msg);
   }
 
   handleError(error: Error) {

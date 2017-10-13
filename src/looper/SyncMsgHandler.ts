@@ -1,6 +1,8 @@
 import {Handler, Message} from './looper';
 import {EventEmitter} from 'events';
 import ApiFactory from '../api';
+import WXMessage from '../wxmessage/WXMessage'
+import Parser from '../wxmessage/parser/Parser';
 
 export default class extends Handler {
 
@@ -10,6 +12,7 @@ export default class extends Handler {
   onErrorListener?: (error: Error) => void;
   onDisconnectListener?: (reason: string, retry: boolean) => void;
   onReconnectListener?: () => void;
+  onReceiveMsgListener?: (type: number, msg: WXMessage) => void;
   disconnect?: boolean = false;
 
   constructor(protected api: ApiFactory) {
@@ -44,11 +47,13 @@ export default class extends Handler {
         const addMsgList = getMsgResult.AddMsgList;
         const modContactList = getMsgResult.ModContactList;
         if (addMsgList && addMsgList.length > 0) {
-          // 消息（聊天）列表变化
-          // 包括打开新的聊天窗口（即使没发言）
           // 收到新消息
-          // 这类导致消息（聊天）列表变化的行为
           this.onAddMsgList(addMsgList);
+          for (const addmsg of addMsgList) {
+            // 根据微信类型解析微信消息
+            const wxmsg = Parser.parse(addmsg)
+            this.onReceiveMsg(wxmsg.type, wxmsg)
+          }
         }
         if (modContactList && modContactList.length > 0) {
           this.onModContactList(modContactList);
@@ -86,6 +91,10 @@ export default class extends Handler {
 
   onModContactList(modContactList: any[]) {
     if (this.onModContactListListener) this.onModContactListListener(modContactList);
+  }
+
+  onReceiveMsg(type: number, msg: WXMessage) {
+    if (this.onReceiveMsgListener) this.onReceiveMsgListener(type, msg);
   }
 
   onDisconnect(reason: string, retry: boolean) {

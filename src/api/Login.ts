@@ -1,3 +1,6 @@
+/**
+ * 登录相关 API
+ */
 import BaseApi from './base/BaseApi';
 import * as utils from '../utils';
 import { URLConfig, GET_QRCODE_UUID_QUERY, LOGIN_QUERY } from '../config';
